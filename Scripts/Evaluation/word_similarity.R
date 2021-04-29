@@ -1,0 +1,186 @@
+rm(list=ls())
+library(xtable)
+library(readr)
+library(textstem)
+library(ggplot2)
+library(ggrepel)
+library(xlsx)
+library(Hmisc)
+library(lsa)
+library(DescTools)
+library(MASS)
+library(ggpubr)
+library(bestNormalize)
+library(boot)
+
+#Setup directories
+mainpath = "C:/Users/Armin/Desktop/Data Science/CSH Project/Colex_vader/Output/"
+setwd(mainpath)
+
+#Chose which networks and datasets to use
+nets = c("combined_clics3based")
+datasets = c("MEN", "SimVerb", "SimLex")
+
+#Choose b = beta parameter, l = lower_threshold parameter
+b = c(0.8)
+l = c(0.5)
+
+#Setup results dataframe
+results = as.data.frame(matrix(NA,length(datasets)*length(b)*length(l),16))
+colnames(results) = c("Network","Threshold","Number_Words","Dataset", "Unique_words","Number_WPs", "WPs_included","Coverage","Pearson", "Spearman", "Kendall", "Pearson_cos", "Spearman_cos", "Kendall_cos", "Pearson_Pvalue", "Spearman_Pvalue")
+c=1
+
+#Run loop over all networks
+for (i in 1:length(nets)) {
+  
+  source("Scripts/Computations/setup_sim_matrix.R")
+  
+  #Run loop over all beta parameter values
+  for (beta in b) {
+    
+  #Run loop over all lower_threshold parameter values
+  for (lower_th in l) {
+  
+  net = nets[i]
+  sim = setup_sim_matrix(net, beta, lower_th)
+  
+  #Get words in the colexification network
+  words = lemmatize_strings(colnames(sim))
+  
+  #Load dataset
+  for (j in 1:length(datasets)) {
+    ds = datasets[j]
+    if (ds == "MEN") {
+      data = read_table2("Datasets/Wordsimilarity/MEN/MEN_dataset_natural_form_full",col_names = FALSE)
+      data$X3 = data$X3/50
+      data$sim = NA
+      data$cossim = NA
+      colnames(data) = c("word1", "word2", "rating", "sim", "cossim")
+      data_orig = data
+      
+    }
+    if (ds == "SimVerb") {
+      data = read.delim("Datasets/Wordsimilarity/SimVerb/SimVerb-3500.txt", header=FALSE)
+      data = data[,c(1,2,4)]
+      data$V4 = as.numeric(data$V4)/10
+      data$sim = NA
+      data$cossim = NA
+      colnames(data) = c("word1", "word2", "rating", "sim", "cossim")
+      data_orig = data
+    }
+    if (ds == "SimLex") {
+      data = read_table2("Datasets/Wordsimilarity/SimLex-999/SimLex-999.txt")
+      data = data[,c(1,2,4)]
+      data$SimLex999 = as.numeric(data$SimLex999)/10
+      data$sim = NA
+      data$cossim = NA
+      colnames(data) = c("word1", "word2", "rating", "sim", "cossim")
+      data_orig = data
+    }
+    
+    #Load and apply function to retrieve similarity values of word pairs
+    source("Scripts/Computations/find_similarity.R")
+    data = find_similarity(data, sim)
+    
+    #For results dataframe
+    data$word1 = as.character(data$word1)
+    data$word2 = as.character(data$word2)
+    
+    #Fill results dataframe
+    results$Network[c] = strsplit(net, "_")[[1]][1]
+    results$Threshold[c] = as.character(lower_th)
+    results$Number_Words[c] = length(words)
+    results$Dataset[c] = ds
+    results$Unique_words[c] = length(unique(c(unique(data$word1), unique(data$word2))))
+    results$Number_WPs[c] = nrow(data)
+    
+    #Store word pairs and corresponding ratings in Excel
+    data_all = data
+    data_all$sim[data_all$sim==-1] = NA
+    fname = sprintf("Tables/%s_%s_quant%s.xlsx", ds, net, as.character(lower_th))
+    write.xlsx(data_all, fname)
+    
+    #Remove 'invalid' rows
+    data = data[data$sim!=-1,]
+    data = data[data$sim!=-Inf,]
+
+    #Continue filling result statistics dataframe
+    results$WPs_included[c] = nrow(data)
+    results$Coverage[c] = as.numeric(results$WPs_included[c])/as.numeric(results$Number_WPs[c])
+    results$Pearson[c] = cor(data$rating, data$sim, method = "pearson")
+    print(results$Pearson[c])
+    
+    #Perform hypothesis test to check if results are statistically significant
+    a = cor.test(data$rating, data$sim, method = "pearson")
+    print(a$p.value)
+    results$Pearson_Pvalue[c] = a$p.value
+    
+    #Perform hypothesis test to check if results are statistically significant
+    results$Spearman[c] = cor(data$rating, data$sim, method = "spearman")
+    a = cor.test(data$rating, data$sim, method = "spearman")
+    results$Spearman_Pvalue[c] = a$p.value
+    
+    #Fill results statistics dataframe
+    results$Kendall[c] = cor(data$rating, data$sim, method = "kendall")
+    results$Pearson_cos[c] = cor(data$rating, data$cossim, method = "pearson")
+    results$Spearman_cos[c] = cor(data$rating, data$cossim, method = "spearman")
+    results$Kendall_cos[c] = cor(data$rating, data$cossim, method = "kendall")
+    
+    # texts = paste0(data$word1, " ", data$word2)
+    # top10 = data[order(data$sim, decreasing = TRUE),][1:10,]
+    # texts[!(data$sim %in% top10$sim)] = ""
+    # data$texts = texts
+    
+    #Select color of scatterplots
+    if (ds=="MEN") {
+      col = "#1b9e77"
+    }
+    if (ds == "SimVerb") {
+      col = "#d95f02"
+    }
+    if (ds == "SimLex") {
+      col = "#7570b3"
+    }
+    
+    #Plot scatterplot
+    g = ggplot(data, aes(x=rating, y = sim)) +
+      geom_point(alpha = 0.6, position="identity", color = col, size = 8) +
+      geom_smooth(color = col, fill = col, size = 3) +
+      # geom_text_repel(hjust=0, vjust=0,size=10)+
+      labs(y="Predicted similarity value",
+           x="Ground truth rating",
+           title=sprintf("%s", ds), 
+           subtitle = sprintf("Pearson: %s, Spearman: %s", round(results$Pearson[c], digits = 4), round(cor(data$rating, data$sim, method = "spearman"), digits = 4))) +
+      theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
+            axis.line = element_line(colour = "black"))+
+      theme(text = element_text(size = 35)) +
+      theme(legend.position = "none")
+    plot(g)
+    pngname = sprintf("Plots/%s_%s_quant%s_similarity_%s.png", ds, net, as.character(lower_th), beta)
+    ggsave(pngname, width = 30, height = 20, units = "cm")
+    
+    #Plot distributions of predicted and ground truth values
+    g = ggplot() +
+      geom_histogram(aes(x = data$sim, fill="b", colour="b"), alpha = 0.5) +
+      geom_histogram(aes(x = data$rating, fill="g", colour="g") ,alpha = 0.5) +
+      geom_smooth() +
+      labs(y="Frequency",
+           x="Similarity",
+           title=sprintf("%s", ds)) +
+      theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
+            axis.line = element_line(colour = "black"))+
+      theme(text = element_text(size = 35)) +
+      scale_colour_manual(name="Similarity", values=c("g" = "gray", "b"=col, "r" = "red"), labels=c("b"="Similarity matrix", "g"="Ground truth rating", "r" = "Cosine sim")) +
+      scale_fill_manual(name="Similarity", values=c("g" = "gray", "b"=col, "r" = "red"), labels=c("b"="Similarity matrix", "g"="Ground truth rating", "r" = "Cosine sim"))
+    plot(g)
+    pngname = sprintf("Plots/%s_%s_th%s_histogram_similarity_%s.png", ds, net, as.character(lower_th), beta)
+    ggsave(pngname, width = 30, height = 20, units = "cm")
+    
+    c = c+1
+  }
+  }
+  }
+}
+
+#Store final table of results
+suppressMessages(write.xlsx(results,sprintf("Tables/Word_similarity_summary.xlsx") ,row.names = TRUE))
