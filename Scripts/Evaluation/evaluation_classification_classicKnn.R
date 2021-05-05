@@ -52,7 +52,7 @@ summary_orig$index = c(1:nrow(summary_orig))
 plot = 0
 
 #Loop for bootstrap sample
-maxiter = 3#240
+maxiter = 120
 for (iter in 1:maxiter){
   
 print(iter)
@@ -71,7 +71,7 @@ for (i in 1:nrow(summary)) {
   ordered = summary[order(summary[,i], decreasing = TRUE),]
   truelabel = strsplit(colnames(summary)[i], "[.]")[[1]][1]
   # print(truelabel)
-  for (k in 1:(nrow(summary)/2)) {
+  for (k in 1:(nrow(summary)-1)) {
     labels = rownames(ordered)[1:k]
     values = ordered[1:k,i]
     knn[k,i] = sum(grepl(truelabel, labels))/k
@@ -96,6 +96,7 @@ res$average = rowMeans(res)
 res = res[1:(nrow(summary)/2),]
 assign(paste0("res_", folder), res[!is.na(res$average),])
 
+if (maxiter > 1) {
 #kNN development plot
 maxpoint = (max(res$average))
 
@@ -108,7 +109,7 @@ g = ggplot() +
   geom_ribbon(aes(x = 1:nrow(res), ymin = res$average-2*res$sd, ymax = res$average+2*res$sd), fill = "grey70") +
   geom_line(aes(x = 1:nrow(res), y=res$average), size = 3) +
   geom_point(aes(x = which(maxpoint==res$average), y=maxpoint), size = 10) +
-  geom_text(aes(x = which(maxpoint==res$average)[1]+round(nrow(res)*0.15), y=maxpoint, label = as.character(round(maxpoint, digits = 4))), size = 15) +
+  geom_text(aes(x = which(maxpoint==res$average)[1]+round(nrow(res)*0.1), y=maxpoint+0.08, label = as.character(round(maxpoint, digits = 4))), size = 15) +
   labs(y="Accuracy",
        x="k nearest neighbors",
        title=sprintf("Average Accuracy"),
@@ -117,10 +118,12 @@ g = ggplot() +
         axis.line = element_line(colour = "black"), axis.text.x = element_text(angle=90),
         axis.text=element_text(size=40))+
   theme(text = element_text(size = 40))+
-  scale_x_continuous(breaks = c(0,25,50,75,100))
+  scale_x_continuous(breaks = c(0,25,50,75,100,125,150,175,200,225))+
+  scale_y_continuous(breaks = c(0.20,0.30,0.40,0.50,0.60,0.70), limits = c(0.20,0.70))
 plot(g)
 pngname = sprintf("%sPlots/kNNa_%s.png", mainpath, folder)
 ggsave(pngname, width = 30, height = 20, units = "cm")
+}
 
 #Bipartite graph
 d = as.data.frame(matrix(NA, length(predlabel), 0))
@@ -128,6 +131,9 @@ d$Category = groundtruth
 d$Predicted = predlabel
 d$Weight = 1
 d = d %>% dplyr::group_by(Category, Predicted) %>% dplyr::summarise(Weight = sum(Weight))
+
+d$Category[d$Category=="belles_lettres"] = 'belles lettres'
+d$Predicted[d$Predicted=="belles_lettres"] = 'belles lettres'
 
 g = ggplot(as.data.frame(d),
            aes(y = Weight, axis1 = Category, axis2 = Predicted)) +

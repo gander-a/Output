@@ -14,7 +14,7 @@ library(bestNormalize)
 library(boot)
 
 #Setup directories
-mainpath = "C:/Users/Armin/Desktop/Data Science/CSH Project/Colex_vader/Output/"
+mainpath = "C:/Users/Armin/Desktop/Output/"
 setwd(mainpath)
 
 #Chose which networks and datasets to use
@@ -147,7 +147,7 @@ for (i in 1:length(nets)) {
       geom_point(alpha = 0.6, position="identity", color = col, size = 8) +
       geom_smooth(color = col, fill = col, size = 3) +
       # geom_text_repel(hjust=0, vjust=0,size=10)+
-      labs(y="Predicted similarity value",
+      labs(y="Predicted values",
            x="Ground truth rating",
            title=sprintf("%s", ds), 
            subtitle = sprintf("Pearson: %s, Spearman: %s", round(results$Pearson[c], digits = 4), round(cor(data$rating, data$sim, method = "spearman"), digits = 4))) +
@@ -170,8 +170,8 @@ for (i in 1:length(nets)) {
       theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
             axis.line = element_line(colour = "black"))+
       theme(text = element_text(size = 35)) +
-      scale_colour_manual(name="Similarity", values=c("g" = "gray", "b"=col, "r" = "red"), labels=c("b"="Similarity matrix", "g"="Ground truth rating", "r" = "Cosine sim")) +
-      scale_fill_manual(name="Similarity", values=c("g" = "gray", "b"=col, "r" = "red"), labels=c("b"="Similarity matrix", "g"="Ground truth rating", "r" = "Cosine sim"))
+      scale_colour_manual(name="Similarity", values=c("g" = "gray", "b"=col, "r" = "red"), labels=c("b"="Predicted values", "g"="Ground truth rating", "r" = "Cosine sim")) +
+      scale_fill_manual(name="Similarity", values=c("g" = "gray", "b"=col, "r" = "red"), labels=c("b"="Predicted values", "g"="Ground truth rating", "r" = "Cosine sim"))
     plot(g)
     pngname = sprintf("Plots/%s_%s_th%s_histogram_similarity_%s.png", ds, net, as.character(lower_th), beta)
     ggsave(pngname, width = 30, height = 20, units = "cm")

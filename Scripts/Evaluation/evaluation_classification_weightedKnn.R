@@ -10,7 +10,7 @@ mainpath = "C:/Users/Armin/Desktop/Output/"
 setwd(mainpath)
 
 #MULTIPLE RESULT FILES
-folders = c("baseline_final")
+folders = c("brown_final")
 
 for (folder in folders) {
 
@@ -52,7 +52,7 @@ summary_orig$index = c(1:nrow(summary_orig))
 
 plot = 0
 
-maxiter = 3#12#240
+maxiter = 120
 for (iter in 1:maxiter) {
 print(iter)
   if (iter < maxiter) {
@@ -72,7 +72,7 @@ for (i in 1:(nrow(summary))) {
   print(i)
   ordered = summary[order(summary[,i], decreasing = TRUE),]
   truelabel = strsplit(colnames(summary)[i], "[.]")[[1]][1]
-  for (k in 1:(nrow(summary)/2)) {
+  for (k in 1:(nrow(summary)-1)) {
     labels = rownames(ordered)[1:k]
     labels = (strsplit(labels, "[.]"))
     labels = as.data.frame(unlist(lapply(labels, `[[`, 1)))
@@ -123,7 +123,7 @@ g = ggplot() +
   geom_ribbon(aes(x = 1:nrow(res), ymin = res$average-2*res$sd, ymax = res$average+2*res$sd), fill = "mediumpurple1") +
   geom_line(aes(x = 1:nrow(res), y=res$average), size = 3, color = "mediumpurple4") +
   geom_point(aes(x = which(maxpoint==res$average), y=maxpoint), size = 10, color = "mediumpurple4") +
-  geom_text(aes(x = which(maxpoint==res$average)[1]+round(nrow(res)*0.25), y=maxpoint, label = as.character(round(maxpoint, digits = 4))), size = 15) +
+  geom_text(aes(x = which(maxpoint==res$average)[1]+round(nrow(res)*0.1), y=maxpoint+0.08, label = as.character(round(maxpoint, digits = 4))), size = 15) +
   labs(y="Accuracy",
        x="k nearest neighbors",
        title=sprintf("Average Accuracy"),
@@ -132,7 +132,8 @@ g = ggplot() +
         axis.line = element_line(colour = "black"), axis.text.x = element_text(angle=90),
         axis.text=element_text(size=40))+
   theme(text = element_text(size = 40))+
-  scale_x_continuous(breaks = c(0,25,50,75,100))
+  scale_x_continuous(breaks = c(0,25,50,75,100,125,150,175,200,225))+
+  scale_y_continuous(breaks = c(0.20,0.30,0.40,0.50,0.60,0.70), limits = c(0.20,0.70))
 plot(g)
 pngname = sprintf("%sPlots/kNNa_%s_weighted.png", mainpath, folder)
 ggsave(pngname, width = 30, height = 20, units = "cm")
