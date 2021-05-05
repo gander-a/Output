@@ -1,5 +1,5 @@
-setup_sim_matrix = function(net, beta, lower_th) {
-  path = sprintf("Similarities/%s/simil_list_beta_", net)
+setup_sim_matrix = function(mainpath, net, beta, lower_th) {
+  path = sprintf("%sSimilarities/%s/simil_list_beta_",mainpath, net)
   sim = read.csv(paste0(path, beta, ".csv"))
   logpara = "log"
   rownames(sim) = sim$X

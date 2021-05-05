@@ -123,7 +123,7 @@ g = ggplot() +
   geom_ribbon(aes(x = 1:nrow(res), ymin = res$average-2*res$sd, ymax = res$average+2*res$sd), fill = "mediumpurple1") +
   geom_line(aes(x = 1:nrow(res), y=res$average), size = 3, color = "mediumpurple4") +
   geom_point(aes(x = which(maxpoint==res$average), y=maxpoint), size = 10, color = "mediumpurple4") +
-  geom_text(aes(x = which(maxpoint==res$average)[1]+round(nrow(res)*0.1), y=maxpoint+0.08, label = as.character(round(maxpoint, digits = 4))), size = 15) +
+  geom_text(aes(x = which(maxpoint==res$average)[1]+round(nrow(res)*0.1), y=maxpoint+0.07, label = as.character(round(maxpoint, digits = 4))), size = 15) +
   labs(y="Accuracy",
        x="k nearest neighbors",
        title=sprintf("Average Accuracy"),
