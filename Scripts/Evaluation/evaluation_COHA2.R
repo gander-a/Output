@@ -54,10 +54,11 @@ g = ggplot(agg, aes(x=dec2, y=meansim, group = dec1, color = dec1)) +
   xlab("") + ylab("Average similarity") +
   theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
         axis.line = element_line(colour = "black"), axis.text.x = element_text(angle=90),
-        axis.text=element_text(size=15))+
+        axis.text=element_text(size=30))+
   scale_colour_viridis_d()+
-  theme(text = element_text(size = 25), plot.title = element_text(size=40))+
-  guides(color=guide_legend(title="Decade"))
+  theme(text = element_text(size = 40), plot.title = element_text(size=40))+
+  guides(color=guide_legend(title="Decade"))+
+  theme(legend.text=element_text(size=20))
   
 plot(g)
 
@@ -74,10 +75,10 @@ g = ggplot(agg, aes(x=dec2, y=meansim, group = dec1, color = dec1)) +
   xlab("") + ylab("Average similarity") +
   theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
         axis.line = element_line(colour = "black"), axis.text.x = element_text(angle=90),
-        axis.text=element_text(size=15))+
+        axis.text=element_text(size=30))+
   scale_colour_viridis_d()+
-  theme(text = element_text(size = 25), plot.title = element_text(size=40))+
-  guides(color=guide_legend(title="Decade"))
+  theme(text = element_text(size = 40), plot.title = element_text(size=40))+
+  theme(legend.position = "none")
 
 plot(g)
 

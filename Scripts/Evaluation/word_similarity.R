@@ -20,6 +20,7 @@ setwd(mainpath)
 #Chose which networks and datasets to use
 nets = c("combined_clics3based")
 datasets = c("MEN", "SimVerb", "SimLex")
+datasets = c("Creativity")
 
 #Choose b = beta parameter, l = lower_threshold parameter
 b = c(0.8)
@@ -42,7 +43,7 @@ for (i in 1:length(nets)) {
   for (lower_th in l) {
   
   net = nets[i]
-  sim = setup_sim_matrix(net, beta, lower_th)
+  sim = setup_sim_matrix(mainpath, net, beta, lower_th)
   
   #Get words in the colexification network
   words = lemmatize_strings(colnames(sim))
@@ -76,6 +77,29 @@ for (i in 1:length(nets)) {
       data$cossim = NA
       colnames(data) = c("word1", "word2", "rating", "sim", "cossim")
       data_orig = data
+    }
+    
+    if (ds == "Creativity") {
+      data = read.csv("Datasets/Wordsimilarity/FF/forwardflow.txt")
+      data = data[,-c(1)]
+      range01 <- function(x){(x-min(x))/(max(x)-min(x))}
+      data$crea_orig = data$Creativity
+      data$Creativity = range01(data$Creativity)
+      data$Creativity = 1 - (data$Creativity)
+      data$sim = NA
+      data$cossim = NA
+      colnames(data) = c("word1", "word2", "rating", "ff", "class", "id", "creativity_orig","sim", "cossim")
+      
+      data_ff = read.csv("Datasets/Forward_flow/FF_FF.csv", comment.char="#")
+      data_ff$Flow = 1-as.numeric(as.character(data_ff$Flow))
+      data$ff_orig = data_ff$Flow
+      data_orig = data
+      
+      data = data[!duplicated(data),]
+      data = data[!is.na(data$creativity_orig),]
+      data = data[!is.na(data$ff_orig),]
+      cc_ff_crea_pearson = cor(1-data$ff_orig, data$creativity_orig, method = "pearson")
+      cc_ff_crea_spear = cor(1-data$ff_orig, data$creativity_orig, method = "spearman")
     }
     
     #Load and apply function to retrieve similarity values of word pairs
@@ -141,6 +165,9 @@ for (i in 1:length(nets)) {
     if (ds == "SimLex") {
       col = "#7570b3"
     }
+    if (ds == "Creativity") {
+      col = "#e7298a"
+    }
     
     #Plot scatterplot
     g = ggplot(data, aes(x=rating, y = sim)) +
@@ -177,10 +204,18 @@ for (i in 1:length(nets)) {
     ggsave(pngname, width = 30, height = 20, units = "cm")
     
     c = c+1
+    
+    #Create output table for the creativity experiment
+    if (ds == "Creativity") {
+      cc_sim_crea_pearson = cor(1-data$sim, data$creativity_orig, method = "pearson")
+      cc_sim_crea_spear = cor(1-data$sim, data$creativity_orig, method = "spearman")
+      
+      summary = t(as.data.frame(matrix(c(cc_sim_crea_pearson, cc_sim_crea_spear, cc_ff_crea_pearson, cc_ff_crea_spear))))
+      colnames(summary) = c("Pearson Colex-based", "Spearman Colex-based", "Pearson FF", "Spearman FF")
+    }
   }
   }
   }
 }
-
 #Store final table of results
 suppressMessages(write.xlsx(results,sprintf("Tables/Word_similarity_summary.xlsx") ,row.names = TRUE))

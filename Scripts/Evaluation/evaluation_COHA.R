@@ -52,9 +52,9 @@ g = ggplot(summary, aes(x=year, y=sim, fill = meansim)) +
   xlab("") + ylab("Average similarity") +
   theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
         axis.line = element_line(colour = "black"), axis.text.x = element_text(angle=90),
-        axis.text=element_text(size=15))+
+        axis.text=element_text(size=30))+
   scale_fill_gradient(low="thistle1",high="orchid4") +
-  theme(text = element_text(size = 25), plot.title = element_text(size=40))+
+  theme(text = element_text(size = 40), plot.title = element_text(size=40))+
   scale_y_continuous(limits = c(4.5,7.5))+
   guides(fill=guide_legend(title="Mean similarity"))
   

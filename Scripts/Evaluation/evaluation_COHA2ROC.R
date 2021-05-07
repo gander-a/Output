@@ -44,7 +44,7 @@ colnames(su) = colnames(summary)
 summary = rbind(summary, su)
 
 set.seed(11848230)
-summary = summary[sample(1:nrow(summary), nrow(summary)*1.0),]
+summary = summary[sample(1:nrow(summary), nrow(summary)*1),]
 
 #Split into train and test set
 summary = summary %>% dplyr::group_by(path1, path2, dec1, dec2) %>% dplyr::summarise(meansim = mean(sim))
@@ -125,7 +125,7 @@ p = ggplot(dt2, aes(x = rowname, y = colname, fill = value)) +
   ggtitle("Same/Different decades as Text 1") +
   xlab("Text 2") + ylab("Text 1") +
   labs() +
-  scale_fill_continuous(low="white", high="black",guide="colorbar",na.value="white") +
+  scale_fill_continuous(low="pink", high="black",guide="colorbar",na.value="white") +
   guides(fill=guide_legend(title="AUC"))
 
 plot(p)

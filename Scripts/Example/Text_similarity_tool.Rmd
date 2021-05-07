@@ -5,6 +5,7 @@ output: pdf_document
 
 General setup and libraries:
 ```{r, include=FALSE}
+rm(list=ls())
 knitr::opts_chunk$set(echo = TRUE)
 mainpath = "C:/Users/Armin/Desktop/Output/"
 ```
@@ -23,7 +24,7 @@ source(sprintf("%sScripts/Computations/text_similarity.R", mainpath))
 Load text files:
 ```{r echo=TRUE}
 #Text1
-text1 = "PG31878_tokens"
+text1 = "PG31178_tokens"
 text1_raw = read.csv(paste0(mainpath,"Scripts/Example/",text1,".txt")
                      , sep = "", header = FALSE)
 text1 = paste(text1_raw$V1)
@@ -56,9 +57,9 @@ Compute text similarity:
 ```{r echo=TRUE}
 #Sample 2000 words from each text
 set.seed(1)
-text1 = sample(text1, 2000, replace = TRUE)
+text1 = sample(text1, 2000)
 set.seed(2)
-text2 = sample(text2, 2000, replace = TRUE)
+text2 = sample(text2, 2000)
 #Apply similarity algorithm
 similarity = suppressMessages(text_sim(mainpath, text1, text2, sim))
 print(similarity)
