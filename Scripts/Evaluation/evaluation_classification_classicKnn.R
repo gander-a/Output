@@ -118,7 +118,7 @@ g = ggplot() +
         axis.line = element_line(colour = "black"), axis.text.x = element_text(angle=90),
         axis.text=element_text(size=40))+
   theme(text = element_text(size = 40))+
-  scale_x_continuous(breaks = c(0,25,50,75,100,125,150,175,200,225))+
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
   scale_y_continuous(breaks = c(0.20,0.30,0.40,0.50,0.60,0.70), limits = c(0.20,0.70))
 plot(g)
 pngname = sprintf("%sPlots/kNNa_%s.png", mainpath, folder)
