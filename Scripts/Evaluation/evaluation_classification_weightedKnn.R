@@ -1,3 +1,4 @@
+#Setup
 rm(list=ls())
 library(ggplot2)
 library(reshape2)
@@ -9,9 +10,10 @@ library(plyr)
 mainpath = "C:/Users/Armin/Desktop/Output/"
 setwd(mainpath)
 
-#MULTIPLE RESULT FILES
+#Results directory
 folders = c("brown_final")
 
+#Load results
 for (folder in folders) {
 
 setwd(sprintf("%sResults/%s", mainpath, folder))
@@ -42,6 +44,7 @@ summary = as.data.frame(m)
 
 groundtruth = unlist(lapply(strsplit(colnames(summary), "[.]"), `[[`, 1))
 
+#Set up dataframes to store results
 knn = as.data.frame(matrix(NA, (nrow(summary)-1), (nrow(summary))))
 predlabel = c()
 colnames(knn) = rownames(summary)
@@ -52,6 +55,7 @@ summary_orig$index = c(1:nrow(summary_orig))
 
 plot = 0
 
+#Compute classification results
 maxiter = 120
 for (iter in 1:maxiter) {
 print(iter)
@@ -60,6 +64,7 @@ print(iter)
   } else {
     rpt = FALSE
   }
+
 set.seed(iter)
 s = ddply(summary_orig,.(genre), function(x) x[sample(nrow(x), nrow(summary_orig)/length(unique(groundtruth)), replace = rpt),])
 summary = s[,1:nrow(s)]
@@ -107,6 +112,7 @@ if (iter == 1) {
 }
 }
 
+#Compute average results and set up for plotting
 res$average = rowMeans(res)
 assign(paste0("res_", folder), res[!is.na(res$average),])
 

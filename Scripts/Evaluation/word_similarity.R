@@ -1,4 +1,6 @@
+#Setup
 rm(list=ls())
+#Load libraries
 library(xtable)
 library(readr)
 library(textstem)
@@ -20,7 +22,7 @@ setwd(mainpath)
 #Chose which networks and datasets to use
 nets = c("combined_clics3based")
 datasets = c("MEN", "SimVerb", "SimLex")
-datasets = c("Creativity")
+# datasets = c("Creativity")
 
 #Choose b = beta parameter, l = lower_threshold parameter
 b = c(0.8)
@@ -150,11 +152,6 @@ for (i in 1:length(nets)) {
     results$Spearman_cos[c] = cor(data$rating, data$cossim, method = "spearman")
     results$Kendall_cos[c] = cor(data$rating, data$cossim, method = "kendall")
     
-    # texts = paste0(data$word1, " ", data$word2)
-    # top10 = data[order(data$sim, decreasing = TRUE),][1:10,]
-    # texts[!(data$sim %in% top10$sim)] = ""
-    # data$texts = texts
-    
     #Select color of scatterplots
     if (ds=="MEN") {
       col = "#1b9e77"
@@ -176,12 +173,14 @@ for (i in 1:length(nets)) {
       # geom_text_repel(hjust=0, vjust=0,size=10)+
       labs(y="Predicted values",
            x="Ground truth rating",
-           title=sprintf("%s", ds), 
+           title=sprintf("%s dataset", ds), 
            subtitle = sprintf("Pearson: %s, Spearman: %s", round(results$Pearson[c], digits = 4), round(cor(data$rating, data$sim, method = "spearman"), digits = 4))) +
       theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
             axis.line = element_line(colour = "black"))+
       theme(text = element_text(size = 35)) +
-      theme(legend.position = "none")
+      theme(legend.position = "none") +
+      scale_x_continuous(breaks = c(0,0.2,0.4,0.6,0.8,1), limits = c(0, 1))
+    
     plot(g)
     pngname = sprintf("Plots/%s_%s_quant%s_similarity_%s.png", ds, net, as.character(lower_th), beta)
     ggsave(pngname, width = 30, height = 20, units = "cm")
@@ -193,7 +192,7 @@ for (i in 1:length(nets)) {
       geom_smooth() +
       labs(y="Frequency",
            x="Similarity",
-           title=sprintf("%s", ds)) +
+           title=sprintf("%s dataset", ds)) +
       theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
             axis.line = element_line(colour = "black"))+
       theme(text = element_text(size = 35)) +

@@ -1,3 +1,4 @@
+#Setup
 rm(list=ls())
 library(ggplot2)
 library(reshape2)
@@ -9,9 +10,10 @@ library(plyr)
 mainpath = "C:/Users/Armin/Desktop/Output/"
 setwd(mainpath)
 
-#MULTIPLE RESULT FILES
+#Folder of results directory
 folders = c("brown_final", "baseline_final")
 
+#Load files
 for (folder in folders) {
 setwd(sprintf("%s/Results/%s", mainpath, folder))
 f = list.files()
@@ -39,8 +41,10 @@ m = as.matrix(summary)
 diag(m) = 0
 summary = as.data.frame(m)
 
+#Format ground truth values
 groundtruth = unlist(lapply(strsplit(colnames(summary), "[.]"), `[[`, 1))
 
+#Set up matrices to store the results
 knn = as.data.frame(matrix(NA, (nrow(summary)-1), (nrow(summary))))
 predlabel = c()
 colnames(knn) = rownames(summary)

@@ -1,3 +1,4 @@
+#Setup
 rm(list=ls())
 library(ggplot2)
 library(reshape2)
@@ -8,13 +9,14 @@ library(dplyr)
 mainpath = "C:/Users/Armin/Desktop/Output/"
 setwd(mainpath)
 
-#MULTIPLE RESULT FILES
+#Result file directory
 folders = c("guten_books_1final", "guten_books_2final", "guten_books_3final", "guten_books_4final","guten_books_5final")
 
 for (folder in folders) {
 setwd(sprintf("%s/Results/%s", mainpath, folder))
 f = list.files()
 
+#Load files
 for (i in 1:length(f)) {
   if (i==1) {
     name = substr((f[i]), 1, 100)
@@ -34,16 +36,18 @@ print(un)
 summary$V1 = as.character(summary$V1)
 summary$V2 = as.character(summary$V2)
 
+#Add mirrored results dataframe because of symmetry of results
 su = summary
 su[,c(1,2)] = su[,c(2,1)]
 colnames(su) = colnames(summary)
 summary = rbind(summary, su)
 
-# summary = summary %>% dplyr::group_by(V1, V2, author1, author2) %>% dplyr::summarise(meansim = mean(sim))
+#Create new columns
 summary$gt = summary$V1==summary$V2
 summary$id = paste0(summary$V1, summary$V2, summary$author1, summary$author2)
 id_unique = unique(summary$id)
 
+#Split into train and test set
 prop = 0.7
 set.seed(11848230)
 train = sample(id_unique, length(id_unique)*prop, replace = FALSE)
@@ -52,6 +56,7 @@ test = id_unique[!(id_unique %in% train)]
 train = summary[summary$id %in% train, ]
 test = summary[summary$id %in% test, ]
 
+#Evaluate test set
 for (i in 1:nrow(test)) {
   print(i)
   row = test[i,]
@@ -67,9 +72,10 @@ for (i in 1:nrow(test)) {
 
 testres$gt = as.numeric(testres$gt)
 
+#Looad library for plotting ROC curve
 library(pROC)
 
-#define object to plot
+#Define object to plot
 rocobj <- roc(testres$gt, testres$score)
 auc = rocobj$auc
 

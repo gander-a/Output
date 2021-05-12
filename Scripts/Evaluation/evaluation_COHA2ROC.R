@@ -1,3 +1,4 @@
+#Setup
 rm(list=ls())
 library(ggplot2)
 library(reshape2)
@@ -10,9 +11,10 @@ library(tidyverse)
 mainpath = "C:/Users/Armin/Desktop/Output/"
 setwd(mainpath)
 
-#MULTIPLE RESULT FILES
+#Results file directory
 folders = c("COHAfinal")
 
+#Load results
 for (folder in folders) {
   setwd(sprintf("%s/Results/%s", mainpath, folder))
   f = list.files()
@@ -38,6 +40,7 @@ summary = summary[!duplicated(summary[,c(1,2,3)]),]
 un = length(unique(summary$index))
 print(un)
 
+#Add mirrored dataframe to account for symmetry
 su = summary
 su[,c(1,2,3,4)] = su[,c(2,1,4,3)]
 colnames(su) = colnames(summary)
@@ -66,6 +69,7 @@ res = as.data.frame(matrix(NA, length(decades), length(decades)))
 colnames(res) = decades
 rownames(res) = decades
 
+#Evaluate test set
 for (i in 1:(length(decades)-1)) {
   for (j in (i+1):length(decades)) {
     print(paste(i,j))
@@ -129,6 +133,8 @@ p = ggplot(dt2, aes(x = rowname, y = colname, fill = value)) +
   guides(fill=guide_legend(title="AUC"))
 
 plot(p)
+
+#Store
 pngname = sprintf("%sPlots/HeatAUC_%s.png", mainpath, folder)
 ggsave(pngname, width = 30, height = 20, units = "cm")
 

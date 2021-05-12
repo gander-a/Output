@@ -1,16 +1,18 @@
 ---
-title: "Text_similarity"
+title: "Text_similarity example"
 output: pdf_document
 ---
 
-General setup and libraries:
+This script includes a simple example of the computation procedure used in my thesis 'Text analysis using colexification networks'. All the results presented in the thesis have been computed using the following steps.
+
+(1) General setup and libraries. Replace the mainpath directory with your directory of the downloaded repository.
 ```{r, include=FALSE}
 rm(list=ls())
 knitr::opts_chunk$set(echo = TRUE)
 mainpath = "C:/Users/Armin/Desktop/Output/"
 ```
 
-Load helper scripts:
+(2) Load helper scripts used for preprocessing the text data files, setting up the similarity matrix used for computing the text similarity and for the text similarity algorithm.
 ```{r echo=TRUE}
 #Preprocessing script
 source(sprintf("%sScripts/Computations/prepro_text.R", mainpath))
@@ -20,8 +22,7 @@ source(sprintf("%sScripts/Computations/setup_sim_matrix.R", mainpath))
 source(sprintf("%sScripts/Computations/text_similarity.R", mainpath))
 ```
 
-
-Load text files:
+(3) Load text files of the two texts for which the similarity is computed. The texts are in the folder Scripts/Example/. Two random texts from the Project Gutenberg corpus have been chosen to feature in this example.
 ```{r echo=TRUE}
 #Text1
 text1 = "PG31178_tokens"
@@ -39,7 +40,7 @@ text2 = iconv(enc2utf8(text2),sub="byte")
 text2 = list(text2[nchar(text1)>0])
 ```
 
-Set up similarity matrix:
+(4) Set up the similarity matrix. It loads the raw similarity matrix corresponding to the selected dampening parameter beta and and performs the modification regarding the lower threshold. 
 ```{r echo=TRUE}
 net="combined_clics3based"
 beta = 0.8
@@ -47,13 +48,13 @@ lower_th = 0.5
 sim = setup_sim_matrix(mainpath, net, beta, lower_th)
 ```
 
-Preprocess texts:
+(5) Preprocess texts. This part applies the preprocessing helper script. During this step, punctuations and numeric symbols are removed from the texts.
 ```{r echo=TRUE}
 text1 = prepro_text(text1)
 text2 = prepro_text(text2)
 ```
 
-Compute text similarity:
+(6) Compute text similarity. First, 2000 words are sampled from each text in order to represent it without using its full extent. Next, the text similarity algorithm is applied.
 ```{r echo=TRUE}
 #Sample 2000 words from each text
 set.seed(1)

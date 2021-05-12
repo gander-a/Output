@@ -1,3 +1,4 @@
+#Setup
 rm(list=ls())
 library(ggplot2)
 library(reshape2)
@@ -8,9 +9,10 @@ library(dplyr)
 mainpath = "C:/Users/Armin/Desktop/Output/"
 setwd(mainpath)
 
-#MULTIPLE RESULT FILES
+#Result file directory
 folders = c("guten_books_1final", "guten_books_2final", "guten_books_3final", "guten_books_4final","guten_books_5final")
 
+#Load files
 for (folder in folders) {
 setwd(sprintf("%s/Results/%s", mainpath, folder))
 f = list.files()
@@ -34,11 +36,13 @@ print(un)
 summary$V1 = as.character(summary$V1)
 summary$V2 = as.character(summary$V2)
 
+#Add mirrored result dataframe because of symmetry
 su = summary
 su[,c(1,2)] = su[,c(2,1)]
 colnames(su) = colnames(summary)
 summary = rbind(summary, su)
 
+#Aggregate results
 samebooks = summary[as.character(summary$V1)==as.character(summary$V2),]
 samebooks_mean = samebooks %>% dplyr::group_by(V1, V2) %>% dplyr::summarise(meansim = mean(sim))
 
@@ -46,8 +50,6 @@ diffbook = summary[as.character(summary$V1)!=as.character(summary$V2),]
 diffbook_mean = diffbook %>% dplyr::group_by(V1) %>% dplyr::summarise(meansim = mean(sim))
 
 #Plot boxplots
-
-# create a data frame
 variety=rep(LETTERS[1:7], each=40)
 treatment=rep(c("high","low"),each=20)
 note=seq(1:280)+sample(1:150, 280, replace=T)
@@ -60,7 +62,7 @@ summary$type[summary$V1!=summary$V2]="different"
 xlabels = rep('book',15)
 xlabels = paste0(xlabels, " ", as.character(1:15))
 
-# grouped boxplot
+#Plot
 g = ggplot(summary, aes(x=reorder(V1, sim, mean), y=sim, fill=type)) + 
   geom_boxplot() +
   ggtitle("Similarity by book") +
@@ -74,6 +76,7 @@ g = ggplot(summary, aes(x=reorder(V1, sim, mean), y=sim, fill=type)) +
   
 plot(g)
 
+#Store
 pngname = sprintf("%sPlots/box_%s.png", mainpath, folder)
 ggsave(pngname, width = 30, height = 20, units = "cm")
 
