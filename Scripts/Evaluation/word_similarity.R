@@ -59,7 +59,7 @@ for (i in 1:length(nets)) {
       allspearmanff = c()
     }
     
-    nmax = 10
+    nmax = 200
     for (s in 1:nmax) {
       print(s)
       
@@ -255,18 +255,19 @@ for (i in 1:length(nets)) {
   }
   }
   
-  print(ds)
-  print(quantile(allpearson, 0.025))
-  print(quantile(allpearson, 0.975))
-  
-  print(quantile(allspearman, 0.025))
-  print(quantile(allspearman, 0.975))
-  
-  print(quantile(allpearsonff, 0.025))
-  print(quantile(allpearsonff, 0.975))
-  
-  print(quantile(allspearmanff, 0.025))
-  print(quantile(allspearmanff, 0.975))
+  #Get confidence intervals
+  # print(ds)
+  # print(quantile(allpearson, 0.025))
+  # print(quantile(allpearson, 0.975))
+  # 
+  # print(quantile(allspearman, 0.025))
+  # print(quantile(allspearman, 0.975))
+  # 
+  # print(quantile(allpearsonff, 0.025))
+  # print(quantile(allpearsonff, 0.975))
+  # 
+  # print(quantile(allspearmanff, 0.025))
+  # print(quantile(allspearmanff, 0.975))
   
   #Store final table of results
   suppressMessages(write.xlsx(results,sprintf("Tables/Word_similarity_summary_%s_%s.xlsx", net, ds) ,row.names = TRUE))
