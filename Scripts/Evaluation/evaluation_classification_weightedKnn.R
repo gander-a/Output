@@ -11,7 +11,7 @@ mainpath = "C:/Users/Armin/Desktop/Output/"
 setwd(mainpath)
 
 #Results directory
-folders = c("brown_final")
+folders = c("baseline_final")
 
 #Load results
 for (folder in folders) {
@@ -133,13 +133,14 @@ g = ggplot() +
   labs(y="Accuracy",
        x="k nearest neighbors",
        title=sprintf("Average Accuracy"),
-       subtitle = sprintf("k:%s - sd:%s" ,which(maxpoint==res$average)[1], round(res$sd[which(maxpoint==res$average)], digits = 4))) +
+       subtitle = sprintf("k:%s" ,which(maxpoint==res$average)[1])) +
   theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
         axis.line = element_line(colour = "black"), axis.text.x = element_text(angle=90),
         axis.text=element_text(size=40))+
   theme(text = element_text(size = 40))+
   scale_x_continuous(breaks = c(0,25,50,75,100,125,150,175,200,225))+
-  scale_y_continuous(breaks = c(0.20,0.30,0.40,0.50,0.60,0.70), limits = c(0.20,0.70))
+  scale_y_continuous(breaks = c(0,0.10,0.20,0.30,0.40,0.50,0.60,0.70), limits = c(0,0.70))+
+  geom_line(aes(x = c(1:nrow(res)), y = 0.20), linetype = "dashed", size = 2)
 plot(g)
 pngname = sprintf("%sPlots/kNNa_%s_weighted.png", mainpath, folder)
 ggsave(pngname, width = 30, height = 20, units = "cm")

@@ -21,16 +21,14 @@ setwd(mainpath)
 
 #Chose which networks and datasets to use
 nets = c("combined_clics3based")
-datasets = c("MEN", "SimVerb", "SimLex")
+# datasets = c("MEN", "SimLex", "SimVerb")
 # datasets = c("Creativity")
+datasets = c("Creativity")
 
 #Choose b = beta parameter, l = lower_threshold parameter
 b = c(0.8)
 l = c(0.5)
 
-#Setup results dataframe
-results = as.data.frame(matrix(NA,length(datasets)*length(b)*length(l),16))
-colnames(results) = c("Network","Threshold","Number_Words","Dataset", "Unique_words","Number_WPs", "WPs_included","Coverage","Pearson", "Spearman", "Kendall", "Pearson_cos", "Spearman_cos", "Kendall_cos", "Pearson_Pvalue", "Spearman_Pvalue")
 c=1
 
 #Run loop over all networks
@@ -53,6 +51,18 @@ for (i in 1:length(nets)) {
   #Load dataset
   for (j in 1:length(datasets)) {
     ds = datasets[j]
+    allpearson = c()
+    allspearman = c()
+    
+    if (ds == "Creativity") {
+      allpearsonff = c()
+      allspearmanff = c()
+    }
+    
+    nmax = 10
+    for (s in 1:nmax) {
+      print(s)
+      
     if (ds == "MEN") {
       data = read_table2("Datasets/Wordsimilarity/MEN/MEN_dataset_natural_form_full",col_names = FALSE)
       data$X3 = data$X3/50
@@ -84,25 +94,38 @@ for (i in 1:length(nets)) {
     if (ds == "Creativity") {
       data = read.csv("Datasets/Wordsimilarity/FF/forwardflow.txt")
       data = data[,-c(1)]
+      
+      #Store original creativity ratings
+      data$crea_orig = data$Creativity    
+      
+      #Scale the creavitiy score to [0,1] and subtract it from 1 such that higher rating is equal to higher similarity
       range01 <- function(x){(x-min(x))/(max(x)-min(x))}
-      data$crea_orig = data$Creativity
       data$Creativity = range01(data$Creativity)
       data$Creativity = 1 - (data$Creativity)
       data$sim = NA
       data$cossim = NA
       colnames(data) = c("word1", "word2", "rating", "ff", "class", "id", "creativity_orig","sim", "cossim")
       
+      data$word1 = tolower(data$word1)
+      data$word2 = tolower(data$word2)
+      
+      #Load forward flow distance ratings
       data_ff = read.csv("Datasets/Forward_flow/FF_FF.csv", comment.char="#")
-      data_ff$Flow = 1-as.numeric(as.character(data_ff$Flow))
+      data_ff$Flow = as.numeric(as.character(data_ff$Flow))
       data$ff_orig = data_ff$Flow
       data_orig = data
       
       data = data[!duplicated(data),]
       data = data[!is.na(data$creativity_orig),]
       data = data[!is.na(data$ff_orig),]
-      cc_ff_crea_pearson = cor(1-data$ff_orig, data$creativity_orig, method = "pearson")
-      cc_ff_crea_spear = cor(1-data$ff_orig, data$creativity_orig, method = "spearman")
+      cc_ff_crea_pearson = cor(data$ff_orig, data$creativity_orig, method = "pearson")
+      cc_ff_crea_spear = cor(data$ff_orig, data$creativity_orig, method = "spearman")
     }
+      
+    # if (s > 1) {
+      set.seed(s)
+      data = data[sample(1:nrow(data), nrow(data), replace = TRUE),]
+    # }
     
     #Load and apply function to retrieve similarity values of word pairs
     source("Scripts/Computations/find_similarity.R")
@@ -111,6 +134,10 @@ for (i in 1:length(nets)) {
     #For results dataframe
     data$word1 = as.character(data$word1)
     data$word2 = as.character(data$word2)
+    
+    #Setup results dataframe
+    results = as.data.frame(matrix(NA,length(datasets)*length(b)*length(l),16))
+    colnames(results) = c("Network","Threshold","Number_Words","Dataset", "Unique_words","Number_WPs", "WPs_included","Coverage","Pearson", "Spearman", "Kendall", "Pearson_cos", "Spearman_cos", "Kendall_cos", "Pearson_Pvalue", "Spearman_Pvalue")
     
     #Fill results dataframe
     results$Network[c] = strsplit(net, "_")[[1]][1]
@@ -123,8 +150,6 @@ for (i in 1:length(nets)) {
     #Store word pairs and corresponding ratings in Excel
     data_all = data
     data_all$sim[data_all$sim==-1] = NA
-    fname = sprintf("Tables/%s_%s_quant%s.xlsx", ds, net, as.character(lower_th))
-    write.xlsx(data_all, fname)
     
     #Remove 'invalid' rows
     data = data[data$sim!=-1,]
@@ -134,23 +159,34 @@ for (i in 1:length(nets)) {
     results$WPs_included[c] = nrow(data)
     results$Coverage[c] = as.numeric(results$WPs_included[c])/as.numeric(results$Number_WPs[c])
     results$Pearson[c] = cor(data$rating, data$sim, method = "pearson")
+    
+    allpearson = c(allpearson, results$Pearson[c])
+    
     print(results$Pearson[c])
     
     #Perform hypothesis test to check if results are statistically significant
     a = cor.test(data$rating, data$sim, method = "pearson")
-    print(a$p.value)
     results$Pearson_Pvalue[c] = a$p.value
     
     #Perform hypothesis test to check if results are statistically significant
     results$Spearman[c] = cor(data$rating, data$sim, method = "spearman")
-    a = cor.test(data$rating, data$sim, method = "spearman")
+    a = cor.test(data$rating, data$sim, method = "spearman", exact = FALSE)
     results$Spearman_Pvalue[c] = a$p.value
+    
+    allspearman = c(allspearman, results$Spearman[c])
+    
+    if (ds == "Creativity") {
+      allpearsonff = c(allpearsonff, cor(data$creativity_orig, data$ff_orig, method = "pearson"))
+      allspearmanff = c(allspearmanff, cor(data$creativity_orig, data$ff_orig, method = "spearman"))
+    }
     
     #Fill results statistics dataframe
     results$Kendall[c] = cor(data$rating, data$sim, method = "kendall")
     results$Pearson_cos[c] = cor(data$rating, data$cossim, method = "pearson")
     results$Spearman_cos[c] = cor(data$rating, data$cossim, method = "spearman")
     results$Kendall_cos[c] = cor(data$rating, data$cossim, method = "kendall")
+    
+    if (s == nmax) {
     
     #Select color of scatterplots
     if (ds=="MEN") {
@@ -174,7 +210,7 @@ for (i in 1:length(nets)) {
       labs(y="Predicted values",
            x="Ground truth rating",
            title=sprintf("%s dataset", ds), 
-           subtitle = sprintf("Pearson: %s, Spearman: %s", round(results$Pearson[c], digits = 4), round(cor(data$rating, data$sim, method = "spearman"), digits = 4))) +
+           subtitle = sprintf("Pearson: %s, Spearman: %s", round(mean(allpearson), digits = 4), round(mean(allspearman), digits = 4))) +
       theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
             axis.line = element_line(colour = "black"))+
       theme(text = element_text(size = 35)) +
@@ -202,7 +238,9 @@ for (i in 1:length(nets)) {
     pngname = sprintf("Plots/%s_%s_th%s_histogram_similarity_%s.png", ds, net, as.character(lower_th), beta)
     ggsave(pngname, width = 30, height = 20, units = "cm")
     
-    c = c+1
+    }
+    
+    # c = c+1
     
     #Create output table for the creativity experiment
     if (ds == "Creativity") {
@@ -215,6 +253,22 @@ for (i in 1:length(nets)) {
   }
   }
   }
+  }
+  
+  print(ds)
+  print(quantile(allpearson, 0.025))
+  print(quantile(allpearson, 0.975))
+  
+  print(quantile(allspearman, 0.025))
+  print(quantile(allspearman, 0.975))
+  
+  print(quantile(allpearsonff, 0.025))
+  print(quantile(allpearsonff, 0.975))
+  
+  print(quantile(allspearmanff, 0.025))
+  print(quantile(allspearmanff, 0.975))
+  
+  #Store final table of results
+  suppressMessages(write.xlsx(results,sprintf("Tables/Word_similarity_summary_%s_%s.xlsx", net, ds) ,row.names = TRUE))
 }
-#Store final table of results
-suppressMessages(write.xlsx(results,sprintf("Tables/Word_similarity_summary.xlsx") ,row.names = TRUE))
+

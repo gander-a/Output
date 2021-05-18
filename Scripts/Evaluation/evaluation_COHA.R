@@ -53,7 +53,7 @@ summary = merge(summary, agg, by.x = "year", by.y = "year")
 g = ggplot(summary, aes(x=year, y=sim, fill = meansim)) + 
   ggtitle("Intra-decade similarity") +
   geom_boxplot(outlier.shape = NA) +
-  xlab("") + ylab("Average similarity") +
+  xlab("") + ylab("Similarity") +
   theme(panel.grid.minor = element_blank(),panel.background = element_blank(),
         axis.line = element_line(colour = "black"), axis.text.x = element_text(angle=90),
         axis.text=element_text(size=30))+

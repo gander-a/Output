@@ -71,7 +71,7 @@ ggsave(pngname, width = 30, height = 20, units = "cm")
 #Alternative plot inncluding only the 1810s
 agg = agg[agg$dec1=="1810s",]
 g = ggplot(agg, aes(x=dec2, y=meansim, group = dec1, color = dec1)) + 
-  geom_smooth(lwd = 2, linetype = "dashed") +
+  geom_smooth(lwd = 2, linetype = "dashed", method = "lm") +
   geom_line(lwd = 2, alpha = 0.7) +
   geom_point(size = 4) +
   ggtitle("Similarity with 1810s texts") +
@@ -118,3 +118,8 @@ pngname = sprintf("%sPlots/coha2_change_%s.png", mainpath, folder)
 ggsave(pngname, width = 30, height = 20, units = "cm")
 
 }
+
+#Linear model
+data$delta = abs(data$year1 - data$year2)
+m = lm(meansim ~ year1+delta , data)
+summary(m)

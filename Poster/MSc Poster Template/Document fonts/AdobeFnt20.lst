@@ -1,0 +1,77 @@
+%!Adobe-FontList 1.20
+%Locale:0x409
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:Roboto-Medium
+FamilyName:Roboto Medium
+StyleName:Regular
+MenuName:Roboto Medium
+StyleBits:0
+WeightClass:500
+WidthClass:5
+AngleClass:0
+FullName:Roboto Medium
+WritingScript:Roman
+OutlineFileName:/Users/office/Nextcloud/office/CD Ressources/Vorlagen/Studium/MSc Poster Template/Document fonts/Roboto-Medium.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:171320
+FileModTime:379375200
+NameArray:0,Win,1,Roboto Medium
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:Roboto-Light
+FamilyName:Roboto Light
+StyleName:Regular
+MenuName:Roboto Light
+StyleBits:0
+WeightClass:300
+WidthClass:5
+AngleClass:0
+FullName:Roboto Light
+WritingScript:Roman
+OutlineFileName:/Users/office/Nextcloud/office/CD Ressources/Vorlagen/Studium/MSc Poster Template/Document fonts/Roboto-Light.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:169680
+FileModTime:379375200
+NameArray:0,Win,1,Roboto Light
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:Invalid
+OutlineFileName:/Users/office/Nextcloud/office/CD Ressources/Vorlagen/Studium/MSc Poster Template/Document fonts/AdobeFnt20.lst
+FileLength:1591
+FileModTime:593610530
+%EndFont
+
+%BeginFont
+Handler:DirectoryHandler
+FontType:TrueType
+FontName:Roboto-LightItalic
+FamilyName:Roboto Light
+StyleName:Italic
+MenuName:Roboto Light
+StyleBits:1
+WeightClass:300
+WidthClass:5
+AngleClass:1
+FullName:Roboto Light Italic
+WritingScript:Roman
+OutlineFileName:/Users/office/Nextcloud/office/CD Ressources/Vorlagen/Studium/MSc Poster Template/Document fonts/Roboto-LightItalic.ttf
+DataFormat:sfntData
+hasSVG:no
+VariableFontType:NonVariableFont
+FileLength:175836
+FileModTime:379375200
+NameArray:0,Win,1,Roboto Light
+%EndFont
+
