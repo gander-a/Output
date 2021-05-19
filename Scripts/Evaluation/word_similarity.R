@@ -118,14 +118,31 @@ for (i in 1:length(nets)) {
       data = data[!duplicated(data),]
       data = data[!is.na(data$creativity_orig),]
       data = data[!is.na(data$ff_orig),]
-      cc_ff_crea_pearson = cor(data$ff_orig, data$creativity_orig, method = "pearson")
-      cc_ff_crea_spear = cor(data$ff_orig, data$creativity_orig, method = "spearman")
+      
+      #Get correlation between original creativity ratings and ff distance ratings
+      cc_ff_crea_pearson = c()
+      cc_ff_crea_spear = c()
+      for (it in 1:200) {
+        # print(it)
+        d = data[sample(1:nrow(data),nrow(data), replace = TRUE),]
+        cc_ff_crea_pearson = c(cc_ff_crea_pearson,cor(d$ff_orig, d$creativity_orig, method = "pearson"))
+        cc_ff_crea_spear = c(cc_ff_crea_spear, cor(d$ff_orig, d$creativity_orig, method = "spearman"))
+      }
+      
+      #Get confidence intervals for correlation scores between original creativity ratings and ff distance ratings
+      print(mean(cc_ff_crea_pearson))
+      print(quantile(cc_ff_crea_pearson, 0.025))
+      print(quantile(cc_ff_crea_pearson, 0.975))
+
+      print(mean(cc_ff_crea_spear))
+      print(quantile(cc_ff_crea_spear, 0.025))
+      print(quantile(cc_ff_crea_spear, 0.975))
+
     }
       
-    # if (s > 1) {
-      set.seed(s)
-      data = data[sample(1:nrow(data), nrow(data), replace = TRUE),]
-    # }
+    #Sample with repetition from data
+    set.seed(s)
+    data = data[sample(1:nrow(data), nrow(data), replace = TRUE),]
     
     #Load and apply function to retrieve similarity values of word pairs
     source("Scripts/Computations/find_similarity.R")
@@ -174,11 +191,6 @@ for (i in 1:length(nets)) {
     results$Spearman_Pvalue[c] = a$p.value
     
     allspearman = c(allspearman, results$Spearman[c])
-    
-    if (ds == "Creativity") {
-      allpearsonff = c(allpearsonff, cor(data$creativity_orig, data$ff_orig, method = "pearson"))
-      allspearmanff = c(allspearmanff, cor(data$creativity_orig, data$ff_orig, method = "spearman"))
-    }
     
     #Fill results statistics dataframe
     results$Kendall[c] = cor(data$rating, data$sim, method = "kendall")
@@ -262,12 +274,6 @@ for (i in 1:length(nets)) {
   # 
   # print(quantile(allspearman, 0.025))
   # print(quantile(allspearman, 0.975))
-  # 
-  # print(quantile(allpearsonff, 0.025))
-  # print(quantile(allpearsonff, 0.975))
-  # 
-  # print(quantile(allspearmanff, 0.025))
-  # print(quantile(allspearmanff, 0.975))
   
   #Store final table of results
   suppressMessages(write.xlsx(results,sprintf("Tables/Word_similarity_summary_%s_%s.xlsx", net, ds) ,row.names = TRUE))
