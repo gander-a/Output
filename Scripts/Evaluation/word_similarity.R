@@ -21,9 +21,9 @@ setwd(mainpath)
 
 #Chose which networks and datasets to use
 nets = c("combined_clics3based")
-# datasets = c("MEN", "SimLex", "SimVerb")
+datasets = c("MEN", "SimLex", "SimVerb")
+datasets = c("MEN")
 # datasets = c("Creativity")
-datasets = c("Creativity")
 
 #Choose b = beta parameter, l = lower_threshold parameter
 b = c(0.8)
@@ -59,7 +59,7 @@ for (i in 1:length(nets)) {
       allspearmanff = c()
     }
     
-    nmax = 200
+    nmax = 1
     for (s in 1:nmax) {
       print(s)
       
