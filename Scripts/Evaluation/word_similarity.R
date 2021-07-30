@@ -22,7 +22,8 @@ setwd(mainpath)
 #Chose which networks and datasets to use
 nets = c("combined_clics3based")
 datasets = c("MEN", "SimLex", "SimVerb")
-datasets = c("MEN")
+datasets = c("SimLex", "SimVerb")
+datasets = c("SimVerb")
 # datasets = c("Creativity")
 
 #Choose b = beta parameter, l = lower_threshold parameter
@@ -79,6 +80,15 @@ for (i in 1:length(nets)) {
       data$sim = NA
       data$cossim = NA
       colnames(data) = c("word1", "word2", "rating", "sim", "cossim")
+      result_glove_simlex <- read.table("C:/Users/Armin/Desktop/Output/Continuation/Othermodels/result_glove300_simverb.csv", quote="\"", comment.char="")
+      data$glove300 = result_glove_simlex
+      data$glove300 = as.numeric(unlist(data$glove300))
+      result_glove_simlex <- read.table("C:/Users/Armin/Desktop/Output/Continuation/Othermodels/glove50_sv.csv", quote="\"", comment.char="")
+      data$glove50 = result_glove_simlex
+      data$glove50 = as.numeric(unlist(data$glove50))
+      result_glove_simlex <- read.table("C:/Users/Armin/Desktop/Output/Continuation/Othermodels/pdc_simverb.csv", quote="\"", comment.char="")
+      data$pdc = result_glove_simlex
+      data$pdc = as.numeric(unlist(data$pdc))
       data_orig = data
     }
     if (ds == "SimLex") {
@@ -88,6 +98,15 @@ for (i in 1:length(nets)) {
       data$sim = NA
       data$cossim = NA
       colnames(data) = c("word1", "word2", "rating", "sim", "cossim")
+      result_glove_simlex <- read.table("C:/Users/Armin/Desktop/Output/Continuation/Othermodels/result_glove300_simlex.csv", quote="\"", comment.char="")
+      data$glove300 = result_glove_simlex
+      data$glove300 = as.numeric(unlist(data$glove300))
+      result_glove_simlex <- read.table("C:/Users/Armin/Desktop/Output/Continuation/Othermodels/glove50_sl.csv", quote="\"", comment.char="")
+      data$glove50 = result_glove_simlex
+      data$glove50 = as.numeric(unlist(data$glove50))
+      result_glove_simlex <- read.table("C:/Users/Armin/Desktop/Output/Continuation/Othermodels/pdc_simlex.csv", quote="\"", comment.char="")
+      data$pdc = result_glove_simlex
+      data$pdc = as.numeric(unlist(data$pdc))
       data_orig = data
     }
     
@@ -252,8 +271,6 @@ for (i in 1:length(nets)) {
     
     }
     
-    # c = c+1
-    
     #Create output table for the creativity experiment
     if (ds == "Creativity") {
       cc_sim_crea_pearson = cor(1-data$sim, data$creativity_orig, method = "pearson")
@@ -262,20 +279,40 @@ for (i in 1:length(nets)) {
       summary = t(as.data.frame(matrix(c(cc_sim_crea_pearson, cc_sim_crea_spear, cc_ff_crea_pearson, cc_ff_crea_spear))))
       colnames(summary) = c("Pearson Colex-based", "Spearman Colex-based", "Pearson FF", "Spearman FF")
     }
+    
+    suppressMessages(write.csv(data,sprintf("Tables/Word_similarity_summary_%s_%s.csv", net, ds) ,row.names = TRUE))
   }
   }
   }
   }
-  
-  #Get confidence intervals
-  # print(ds)
-  # print(quantile(allpearson, 0.025))
-  # print(quantile(allpearson, 0.975))
-  # 
-  # print(quantile(allspearman, 0.025))
-  # print(quantile(allspearman, 0.975))
   
   #Store final table of results
   suppressMessages(write.xlsx(results,sprintf("Tables/Word_similarity_summary_%s_%s.xlsx", net, ds) ,row.names = TRUE))
-}
+  
+  print(ds)
+  print("full")
+  print(cor(data_orig$rating, data_orig$glove300, method = "pearson"))
+  print(cor(data_orig$rating, data_orig$glove300, method = "spearman"))
+  
+  print("colex")
+  print(cor(data$rating, data$sim, method = "pearson"))
+  print(cor(data$rating, data$sim, method = "spearman"))
+  
+  print("glove 50")
+  print(cor(data$rating, data$glove50, method = "pearson"))
+  print(cor(data$rating, data$glove50, method = "spearman"))
+  
+  print("glove 300")
+  print(cor(data$rating, data$glove300, method = "pearson"))
+  print(cor(data$rating, data$glove300, method = "spearman"))
+  
+  print("pdc")
+  print(cor(data$rating, data$pdc, method = "pearson"))
+  print(cor(data$rating, data$pdc, method = "spearman"))
+  
+  plot(data$rating, data$pdc, col = "red", pch = 16, xlim = c(0,1), ylim = c(0,1), cex = 3)
+  par(new = T)
+  plot(data_orig$rating, data_orig$pdc, xlim = c(0,1), ylim = c(0,1), cex = 3)
+  
+  }
 

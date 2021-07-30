@@ -11,7 +11,7 @@ setwd(paste0(mainpath, "Scripts"))
 
 #Load networks
 for (net in c("clics3_extended", "omegawiki_extended", "freedict_extended")) {
-  fname = sprintf('%s/Files/filt_%s.Rda', mainpath, net)
+  fname = sprintf('%sFiles/filt_%s.Rda', mainpath, net)
   load(fname)
   weight = "LanguageWeight"
   network = network[,c("from_word", "to_word", weight)]

@@ -16,8 +16,6 @@ load(fname)
 network_orig = network
 
 #Select and format columns
-weight = "LanguageWeight"
-network = network[,c("from_word", "to_word", weight)]
 network$weight = as.numeric(network$weight)
 colnames(network) = c("from", "to", "weight")
 
@@ -37,6 +35,7 @@ for (i in 1:nrow(adjmat)) {
 
 #Loop over different beta values
 betalist = c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ,0.9)
+betalist = c(0.8)
 
 #Load script where inverting happens
 source('Networks/similarities_from_adjacency.R')

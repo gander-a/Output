@@ -14,6 +14,8 @@ fname = sprintf('%sFiles/filt_%s.Rda', mainpath, net)
 
 #Load network
 network_orig<-readRDS(fname)
+network_orig$from_word = gsub("[[:punct:]]", "", network_orig$from_word)
+network_orig$to_word = gsub("[[:punct:]]", "", network_orig$to_word)
 network = network_orig
 
 #Add reverse edges (for algorithm)
@@ -30,7 +32,7 @@ network$to = as.character(network$to)
 network$weight = as.numeric(as.character(network$weight))
 
 #Helper function for splitting nodes
-stopwords =c("(something)","(somebody)","(someone)","something)","(somebody", "(someone","verb","(of","(a", "a","(", ")",",","not", "or", "of", "to", "(to", "i", "the", "(the", "with", "in", "for")
+stopwords =c("something","somebody","someone","(something)","(somebody)","(someone)","something)","(somebody", "(someone","(something","somebody)", "someone)","verb","(of","(a", "a","(", ")",",","not", "or", "of", "to", "(to", "i", "the", "(the", "with", "in", "for")
 split_and_clean <- function(word, par = FALSE) {
   wordsplit = strsplit(word," ")[[1]]
   wordsplit = gsub('[0-9]+', '', wordsplit)
@@ -71,7 +73,7 @@ for (i in 1:nrow(network_orig)) {
   
   #Add new nodes and edges
   if (length(wordfrom)==1&length(wordto)==1|(is.na(wordfrom))|(is.na(wordto))) {
-    newrows = as.data.frame(matrix(c(currentrow$from_word,currentrow$to_word,currentrow$LanguageWeight), 1, 3))
+    newrows = as.data.frame(matrix(c(split_and_clean(currentrow$from_word),split_and_clean(currentrow$to_word),currentrow$LanguageWeight), 1, 3))
     colnames(newrows) = colnames(allnew)
   } else {
     newrows <- network[0,]
